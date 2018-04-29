@@ -20,3 +20,22 @@ E
 I t t
 I k k
 P A
+I int INT
+I moaz ID
+P A
+S
+L int
+L moaz 
+L k
+I j ID
+I k ID
+S
+P A
+L k
+L j
+I cse ID
+P A
+E
+P A
+E
+P A
