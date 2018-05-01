@@ -1,3 +1,4 @@
+#define DefaultBucketSize 100
 class SymbolTable{
     ScopeTable *scopes,*tail;//linked list of scope table
     int numScopes;
@@ -65,8 +66,8 @@ public:
     }
 
     bool Remove(SymbolInfo symbol){
-        return !(currentScope->Delete(symbol)).containsNull();
         //if Delete() contains Null Then Not removed
+        return !(currentScope->Delete(symbol)).containsNull();
     }
 
     SymbolInfo* Lookup(SymbolInfo symbol){
@@ -74,7 +75,6 @@ public:
         SymbolInfo *item;
         while(searchingScope != NULL){
             item = searchingScope->Lookup(symbol);
-
             if(item != NULL){//if symbol exists in searching scope
                 return item;
             }else{

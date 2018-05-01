@@ -1,7 +1,5 @@
 using namespace std;
 #include <bits/stdc++.h>
-#define NullString "Null"
-#define DefaultBucketSize 100
 #define MAXSIZE 100000
 #include "SymbolInfo.cpp"
 #include "ScopeTable.cpp"
