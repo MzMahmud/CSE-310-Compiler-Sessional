@@ -1,8 +1,0 @@
-*.pdf
-*.exe
-*.o
-*.txt
-*.docx
-*.pptx
-*.doc
-*.ppt
