@@ -33,19 +33,6 @@ void yyerror(char *s){
 	fprintf(errorOut,"Error At line %3d :  %s\n\n",yylineno,s);
 }
 
-void copy(string &d,string s,int i,int j){
-	d = "";
-	char a[2] = "a";
-	for(int k = i;k < j;k++){
-		a[0] = s.at(k);
-		cout << "a[1] " << a << endl;
-		d = d + a;
-	}	
-	cout << d << endl;
-	cout << d.length() << endl;
-}
-
-
 %}
 
 %token IF ELSE FOR WHILE DO BREAK INT CHAR FLOAT DOUBLE VOID RETURN SWITCH CASE DEFAULT CONTINUE
@@ -61,6 +48,7 @@ start : program							{
 											$$ = new SymbolInfo[1]; 
 											$$->name = $1->name;
 											fprintf(logOut,"%s\n\n",$$->name.c_str());
+											table->PrintCurrentScopeTable(logOut);
 										} 
 	  ;
 
@@ -108,7 +96,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON			{
 											SymbolInfo*p = table->Lookup(s);
 											if(p == NULL){
 												table->Insert(s);
-												table->PrintCurrentScopeTable(logOut);
+												//table->PrintCurrentScopeTable(logOut);
 											}else{
 												
 												if( (p->type+p->para) != (s.type+s.para) ){
@@ -134,7 +122,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON			{
 											SymbolInfo*p = table->Lookup(s);
 											if(p == NULL){
 												table->Insert(s);
-												table->PrintCurrentScopeTable(logOut);
+												//table->PrintCurrentScopeTable(logOut);
 											}else{
 												
 												if( (p->type) != (s.type) ){
@@ -167,14 +155,24 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN{
 											
 											if(p == NULL){
 												table->Insert(s);
-												table->PrintCurrentScopeTable(logOut);
+												//table->PrintCurrentScopeTable(logOut);
 											}else{
-												string a = p->type + p->para;
-												string b = s.type + s.para;
-												if(a != b){		
+												if(p->state == "dec"){
+													string a = p->type + p->para;
+													string b = s.type + s.para;
+													if(a != b){		
+														errors++;
+														fprintf(errorOut,"Error at line %3d:  ",yylineno);
+														fprintf(errorOut,"conflicting types for '%s'\n\n",$ID->name.c_str());
+													}else{
+														
+														p->state = "def";
+														
+													}
+												}else if(p->state == "def"){
 													errors++;
 													fprintf(errorOut,"Error at line %3d:  ",yylineno);
-													fprintf(errorOut,"conflicting types for '%s'\n\n",$ID->name.c_str());
+													fprintf(errorOut,"redefinition of function '%s'\n\n",$ID->name.c_str());
 												}
 											}
 											decList.clear();
@@ -201,7 +199,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN{
 											SymbolInfo*p = table->Lookup(s);
 											if(p == NULL){
 												table->Insert(s);
-												table->PrintCurrentScopeTable(logOut);
+												//table->PrintCurrentScopeTable(logOut);
 											}else{
 												
 												if( (p->type) != (s.type) ){
@@ -322,7 +320,7 @@ var_declaration : type_specifier declaration_list SEMICOLON				{
 											$$->name = $1->name + " " + $2->name + $3->name + "\n";  
 											fprintf(logOut,"%s\n\n",$$->name.c_str());
 											
-											table->PrintCurrentScopeTable(logOut);
+											//table->PrintCurrentScopeTable(logOut);
 											
 										}
  		 ;
@@ -752,11 +750,11 @@ factor	: variable 						{
 											if(p == NULL){
 												errors++;
 												fprintf(errorOut,"Error at Line %3d :  ",yylineno);
-												fprintf(errorOut,"'%s' is not decreared in the scope\n\n",$1->name.c_str());
+												fprintf(errorOut,"undefined reference to '%s'\n\n",$1->name.c_str());
 											}else if(p->state == ""){
 												errors++;
 												fprintf(errorOut,"Error at Line %3d :  ",yylineno);
-												fprintf(errorOut,"'%s' is not a function\n\n",$1->name.c_str());
+												fprintf(errorOut,"called object '%s' is not a function\n\n",$1->name.c_str());
 											}else if(p->type == "void"){
 												errors++;
 												fprintf(errorOut,"Error at Line %3d :  ",yylineno);
@@ -767,11 +765,8 @@ factor	: variable 						{
 												
 												fprintf(errorOut,"argument doesn't match funtion defenation of '%s'\n\n",$1->name.c_str());
 											}
-											
-											
-											
-											cout << $ID->name << "(" <<argType << ")" << endl; 
-																						
+							
+																		
 											fprintf(logOut,"At line no: %d ",yylineno);
 											fprintf(logOut,"factor	: ID LPAREN argument_list RPAREN\n\n");
 											$$ = new SymbolInfo[1];
@@ -869,8 +864,8 @@ int main(int argc,char *argv[]){
 
 	yyin = input;
 	
-	while(!feof(input))
-		yyparse();
+	
+	yyparse();
 	
 
 	//prints lineno and error count in log
