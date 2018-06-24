@@ -28,7 +28,7 @@ SymbolTable* table = new SymbolTable(100);
 vector<string> decList;
 vector< pair<string,string> > varList;
 
-void yyerror(char *s){
+void yyerror(const char *s){
 	errors++;
 	fprintf(errorOut,"Error At line %3d :  %s\n\n",yylineno,s);
 }
@@ -105,7 +105,8 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON			{
 													fprintf(errorOut,"conflicting types for '%s'\n\n",$ID->name.c_str());
 												}
 											}
-											decList.clear();										
+											decList.clear();
+											varList.clear();										
 																						
 											fprintf(logOut,"At line no: %d ",yylineno);
 											fprintf(logOut,"func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON\n\n");
@@ -301,9 +302,10 @@ var_declaration : type_specifier declaration_list SEMICOLON				{
 														decList[i].erase(l-1);
 													}
 													
-													//cout  << decList[i] << " " << t << endl;
+													cout  << decList[i] << " " << t << endl;
 														
 													table->Insert(SymbolInfo(decList[i],t));
+													table->PrintCurrentScopeTable(logOut);
 													
 												}else{
 													
@@ -498,6 +500,14 @@ statement : var_declaration				{
 											fprintf(logOut,"%s\n\n",$$->name.c_str());
 										}
 	  ;
+	  | RETURN SEMICOLON		{
+											fprintf(logOut,"At line no: %d ",yylineno);
+											fprintf(logOut,"statement : RETURN SEMICOLON\n\n");
+											$$ = new SymbolInfo[1];
+											$$->name = $1->name + " " + $2->name + "\n";  
+											fprintf(logOut,"%s\n\n",$$->name.c_str());
+										}
+	  ;
 	  
 expression_statement 	: SEMICOLON		{
 											fprintf(logOut,"At line no: %d ",yylineno);
@@ -536,6 +546,10 @@ variable : ID 							{
 													errors++;
 													fprintf(errorOut,"Error at Line %3d :  ",yylineno);
 													fprintf(errorOut,"'%s' is not decreared in the scope\n\n",$1->name.c_str());
+												}else if(p->state != ""){
+													errors++;
+													fprintf(errorOut,"Error at Line %3d :  ",yylineno);
+													fprintf(errorOut,"function pointer '%s' cann't be used as veribale\n\n",$1->name.c_str());
 												}
 											
 												$$->name = $1->name;
