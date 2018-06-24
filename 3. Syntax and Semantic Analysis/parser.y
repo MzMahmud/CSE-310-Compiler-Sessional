@@ -534,7 +534,7 @@ variable : ID 							{
 											if(s.rfind("*") != string::npos){
 												errors++;
 												fprintf(errorOut,"Error at Line %3d : ",yylineno);
-												fprintf(errorOut,"Type Mismatch\n\n");
+												fprintf(errorOut,"no index on array '%s' \n\n",$1->name.c_str());
 												s.erase(s.length()-1);
 												$$->type = s; 
 											}else{
